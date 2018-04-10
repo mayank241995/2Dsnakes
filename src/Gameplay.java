@@ -1,10 +1,11 @@
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-
+import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -16,7 +17,7 @@ public class Gameplay extends JPanel implements KeyListener,ActionListener{
 	private int[] snakeylength = new int [750];
 	
 	private boolean left=false;
-	private boolean right=false;
+	private boolean right=false; 
 	private boolean up=false;
 	private boolean down=false;
 	
@@ -31,7 +32,22 @@ public class Gameplay extends JPanel implements KeyListener,ActionListener{
 	private Timer timer;
 	private int delay=100;
 	
-	private ImageIcon snakeImage;
+	private ImageIcon snakeimage;
+	
+	private int [] enemyxpos={25,50,75,100,125,150,175,200,225,250,300,325,350,375,
+			400,425,450,475,500,525,550,575,600,625,650,675,700,725,
+			750,775,800,825,850};
+	private int [] enemyypos={75,100,125,150,175,200,225,250,275,300,325,350,
+			375,400,425,450,475,500,525,575,600,625};
+	
+	private ImageIcon enemyimage;
+	
+	private Random random = new Random();
+	
+	private int xpos = random.nextInt(34);
+	private int ypos = random.nextInt(23);
+	
+	private int score=0;
 	
 	private int moves = 0;
 	
@@ -74,8 +90,15 @@ public void paint (Graphics g)
 	
 	//draw the background for the gameplay
 	g.setColor(Color.black);
-	g.drawRect(24, 74, 850, 575);
-	
+	g.fillRect(24, 74, 850, 575);
+	//draw the score 
+	g.setColor(Color.white);
+	g.setFont(new Font("arial", Font.PLAIN, 14));
+	g.drawString("Scores: "+score, 780,30);
+	//draw length 
+	g.setColor(Color.white);
+	g.setFont(new Font("arial", Font.PLAIN, 14));
+	g.drawString("Length: "+lengthofsnake, 780,50);
 	rightmouth = new ImageIcon("rightmouth.png");
 	rightmouth.paintIcon(this, g,snakexlength[0] ,snakeylength[0]);
 	
@@ -106,8 +129,37 @@ public void paint (Graphics g)
 		}
 		if(a!=0)
 		{
-			snakeImage = new ImageIcon("snakeImage.png");
-			snakeImage.paintIcon(this, g,snakexlength[a] ,snakeylength[a]);
+			snakeimage = new ImageIcon("snakeimage.png");
+			snakeimage.paintIcon(this, g,snakexlength[a] ,snakeylength[a]);
+		}
+	}
+	enemyimage = new ImageIcon("enemy.png");
+	
+	if((enemyxpos[xpos]==snakexlength[0]&& enemyypos[ypos]==snakeylength[0]))
+	{
+		score++;
+		lengthofsnake++;
+		xpos = random .nextInt(34);
+		ypos = random.nextInt(23);
+		
+	}
+	enemyimage.paintIcon(this, g, enemyxpos[xpos], enemyypos[ypos]);
+	for(int b=1;b<lengthofsnake;b++)
+	{
+		if(snakexlength[b] == snakexlength[0]&&snakeylength[b] == snakeylength[0])
+		{
+			right=false;
+			left=false;
+			up=false;
+			down=false;
+			
+			g.setColor(Color.white);
+			g.setFont(new Font("arial",Font.BOLD ,50));
+			g.drawString("Game over", 300, 300);
+			
+			g.setFont(new Font("arial",Font.BOLD ,20));
+			g.drawString("Restart Game", 350, 340);
+			
 		}
 	}
 	g.dispose();
@@ -122,7 +174,7 @@ public void actionPerformed(ActionEvent e) {
 		{
 			snakeylength[r+1] = snakeylength[r];
 		}
-		for(int r = lengthofsnake; r>=0;r--)
+		for(int r = lengthofsnake; r>=0;r--) //logic
 		{
 			if(r==0)
 			{
@@ -172,15 +224,15 @@ public void actionPerformed(ActionEvent e) {
 		{
 			if(r==0)
 			{
-				snakeylength[r] = snakeylength[r]+25;
+				snakeylength[r] = snakeylength[r]-25;
 			} 
 			else
-			{
+			{   
 				snakeylength[r]=snakeylength[r-1];
 			}
-			if(snakeylength[r]>625)
+			if(snakeylength[r]<75)
 			{
-				snakeylength[r]=75;
+				snakeylength[r]=625;
 			}
 		}
 		repaint();
@@ -195,15 +247,15 @@ public void actionPerformed(ActionEvent e) {
 		{
 			if(r==0)
 			{
-				snakeylength[r] = snakeylength[r]-25;
+				snakeylength[r] = snakeylength[r]+25;
 			} 
 			else
 			{
 				snakeylength[r]=snakeylength[r-1];
 			}
-			if(snakeylength[r]<75)
+			if(snakeylength[r]>625)
 			{
-				snakeylength[r]=625;
+				snakeylength[r]=75;
 			}
 		}
 		repaint();
@@ -213,7 +265,13 @@ public void actionPerformed(ActionEvent e) {
 
 @Override
 public void keyPressed(KeyEvent e) {
-	// TODO Auto-generated method stub
+	if(e.getKeyCode()==KeyEvent.VK_SPACE)
+	{
+		moves=0;
+		score=0;
+		lengthofsnake=3;
+		repaint();
+	}
 	
 	if(e.getKeyCode()==KeyEvent.VK_RIGHT)
 	{
@@ -262,9 +320,9 @@ public void keyPressed(KeyEvent e) {
 			up=false;
 			down=true;
 		}
-		
-		right=false;
 		left =false;
+		right=false;
+		
 	}
 	if(e.getKeyCode()==KeyEvent.VK_DOWN)
 	{
@@ -276,8 +334,9 @@ public void keyPressed(KeyEvent e) {
 		}
 		else
 		{
-			down=false;
 			up=true;
+			down=false;
+			
 		}
 		
 		right=false;
